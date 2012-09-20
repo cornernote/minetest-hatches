@@ -1,88 +1,83 @@
-
 -- Local constants
--- This _has_ to be set to 1
-local HATCH_OPENED = 1
+-- This _has_ to be set to 2
+local HATCH_OPENED = 2
 -- This has to be != from HATCH_OPENED and is coded on 4 bits
-local HATCH_CLOSED = 0
+local HATCH_CLOSED = 1
 
 -- Local Functions
 local on_hatch_punched = function(pos, node, puncher)
-	if (node.name ~= 'hatches:hatch_closed')
-		and (node.name ~= 'hatches:hatch_opened') then
-		return
-	end
-	local state = node.param2
+    if (node.name ~= 'hatches:hatch_closed')
+        and (node.name ~= 'hatches:hatch_opened') then
+        return
+    end
+    local state = node.param2
 
-	-- Switch the hatch state when hit
-	if state == HATCH_OPENED then
-		node.name = 'hatches:hatch_closed'
-		node.param2 = HATCH_CLOSED
-	elseif state == HATCH_CLOSED then
-		node.name = 'hatches:hatch_opened'
-		node.param2 = HATCH_OPENED
-	else
-		print('Uninitialized node: ' .. state)
-	end
+    -- Switch the hatch state when hit
+    if state == HATCH_OPENED then
+        node.name = 'hatches:hatch_closed'
+        node.param2 = HATCH_CLOSED
+    else
+        node.name = 'hatches:hatch_opened'
+        node.param2 = HATCH_OPENED
+    end
 
-	minetest.env:add_node(pos, {
-		name = node.name,
-		param2 = node.param2,
-	})
-end
-
-local on_hatch_placed = function(pos, node, placer)
-	if node.name ~= 'hatches:hatch_opened' then
-		return
-	end
-
-	minetest.env:add_node(pos, {
-		name = node.name,
-		param2 = HATCH_OPENED,
-	})
+    minetest.env:add_node(pos, {
+        name = node.name,
+        param2 = node.param2,
+    })
 end
 
 -- Nodes
 -- As long as param2 is set to 1 for open hatches, it doesn't matter to
 -- use drawtype = 'signlike'
 minetest.register_node('hatches:hatch_opened', {
-	drawtype = 'signlike',
-	tile_images = {'hatch.png'},
-	inventory_image = 'hatch.png',
-	sunlight_propagates = true,
-	paramtype = 'light',
-	walkable = false,
-	climbable = true,
-	selection_box = {
-		type = "wallmounted",
-	},
-	material = minetest.digprop_constanttime(1.0),
-	dug_item = 'NodeItem "hatches:hatch_closed" 1',
+    drawtype = 'signlike',
+    tile_images = {'hatch.png'},
+    inventory_image = 'hatch.png',
+    sunlight_propagates = true,
+    paramtype = 'light',
+    paramtype2 = "wallmounted",
+    legacy_wallmounted = true,
+    walkable = false,
+    climbable = true,
+    selection_box = {
+        type = "wallmounted",
+    },
+    drop = 'hatches:hatch_closed',
+    on_punch = on_hatch_punched,
+    groups = { choppy=2, dig_immediate=2 },
 })
 
 minetest.register_node('hatches:hatch_closed', {
-	drawtype = 'raillike',
-	tile_images = {'hatch.png'},
-	inventory_image = 'hatch.png',
-	sunlight_propagates = true,
-	paramtype = 'light',
-	walkable = true,
-	selection_box = {
-		type = "fixed",
-		fixed = {-1/2, -1/2, -1/2, 1/2, -2/5, 1/2},
-	},
-	material = minetest.digprop_constanttime(1.0),
+    description = "Hatch",
+    drawtype = 'nodebox',
+    tile_images = {'hatch.png'},
+    inventory_image = 'hatch.png',
+    wield_image = "hatch.png",
+    paramtype = 'light',
+    is_ground_content = true,
+    walkable = true,
+    node_box = {
+        type = "fixed",
+        fixed = {-1/2, 2/5, -1/2, 1/2, 1/2, 1/2},
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-1/2, 2/5, -1/2, 1/2, 1/2, 1/2},
+    },
+    on_punch = on_hatch_punched,
+    groups = { choppy=2, dig_immediate=2 },
 })
 
 -- Crafts
 minetest.register_craft({
-	output = 'NodeItem "hatches:hatch_closed" 2',
-	recipe = {
-		{'node "default:wood" 1', 'node "default:wood" 1', 'node "default:wood" 1'},
-		{'node "default:wood" 1', 'node "default:wood" 1', 'node "default:wood" 1'},
-	},
+    output = 'hatches:hatch_closed 2',
+    recipe = {
+        {'default:wood 1', 'default:wood 1', 'default:wood 1'},
+        {'default:wood 1', 'default:wood 1', 'default:wood 1'},
+    },
 })
 
--- Change the hatch state
-minetest.register_on_punchnode(on_hatch_punched)
--- Reset param2 for open hatches
-minetest.register_on_placenode(on_hatch_placed)
+-- Mesecon Stuff:
+mesecon:register_on_signal_on(on_hatch_punched)
+mesecon:register_on_signal_off(on_hatch_punched)
