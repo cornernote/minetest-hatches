@@ -79,5 +79,7 @@ minetest.register_craft({
 })
 
 -- Mesecon Stuff:
-mesecon:register_on_signal_on(on_hatch_punched)
-mesecon:register_on_signal_off(on_hatch_punched)
+if minetest.get_modpath("mesecons") then
+	mesecon:register_on_signal_on(on_hatch_punched)
+	mesecon:register_on_signal_off(on_hatch_punched)
+end
