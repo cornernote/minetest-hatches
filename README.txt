@@ -1,4 +1,4 @@
 Harches for Minetest
 
 by: ironzorg 
-forum page: http://minetest.net/forum/viewtopic.php?id=609
+forum page: https://forum.minetest.net/viewtopic.php?id=609
